@@ -7,6 +7,12 @@ pipeline {
   }
 
   stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
     stage('Install') {
       steps {
         sh 'npm install'
@@ -15,8 +21,25 @@ pipeline {
 
     stage('Test') {
       steps {
-        sh 'npx mocha tests/loginFavoriteSamsung.test.js'
+        script {
+          try {
+            sh 'npx mocha tests/loginFavoriteSamsung.test.js'
+          } catch (err) {
+            currentBuild.result = 'FAILURE'
+            throw err
+          }
+        }
       }
     }
   }
+
+  post {
+    always {
+      echo 'Pipeline finished.'
+      // Adjust paths based on your reports if any
+      archiveArtifacts artifacts: '**/test-results/*.xml', allowEmptyArchive: true
+      junit '**/test-results/*.xml'
+    }
+  }
 }
+
