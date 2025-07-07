@@ -53,25 +53,31 @@ describe("Test Favorite Samsung Device", function () {
         try {
           await driver.get("https://www.bstackdemo.com");
 
-          // Wait for username field before sending keys
-          let username = await driver.wait(
+          // Wait for username input to be located and visible, then send keys
+          const usernameInput = await driver.wait(
             until.elementLocated(By.id("username")),
-            10000
+            15000
           );
-          await username.sendKeys("demouser");
+          await driver.wait(until.elementIsVisible(usernameInput), 15000);
+          await usernameInput.sendKeys("demouser");
 
-          // Send password
-          await driver
-            .findElement(By.id("password"))
-            .sendKeys("testingisfun99");
-
-          // Fix login button selector to button[type='submit']
-          const loginBtn = await driver.findElement(
-            By.css("button[type='submit']")
+          // Wait for password input to be located and visible, then send keys
+          const passwordInput = await driver.wait(
+            until.elementLocated(By.id("password")),
+            15000
           );
+          await driver.wait(until.elementIsVisible(passwordInput), 15000);
+          await passwordInput.sendKeys("testingisfun99");
+
+          // Wait for login button to be located and visible, then click
+          const loginBtn = await driver.wait(
+            until.elementLocated(By.css("button[type='submit']")),
+            15000
+          );
+          await driver.wait(until.elementIsVisible(loginBtn), 15000);
           await loginBtn.click();
 
-          // wait for filter and click Samsung
+          // Wait for filter and click Samsung
           await driver.wait(until.elementLocated(By.css(".filter")), 15000);
           const samsungFilter = await driver.findElement(
             By.css("label[for='samsung']")
