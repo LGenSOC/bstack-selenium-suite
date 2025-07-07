@@ -1,0 +1,21 @@
+{
+  "name": "bstack-tech-challenge",
+  "version": "1.0.0",
+  "main": "browserstack.config.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "mocha tests/loginFavoriteSamsung.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "chai": "^5.2.0",
+    "dotenv": "^17.0.1",
+    "mocha": "^11.7.1",
+    "selenium-webdriver": "^4.34.0"
+  }
+}
