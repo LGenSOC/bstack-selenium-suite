@@ -19,6 +19,13 @@ pipeline {
       }
     }
 
+    stage('Debug Credentials') {
+      steps {
+        sh 'echo "BROWSERSTACK_USERNAME: $BROWSERSTACK_USERNAME"'
+        sh 'echo "BROWSERSTACK_ACCESS_KEY: $BROWSERSTACK_ACCESS_KEY"'
+      }
+    }
+
     stage('Test') {
       steps {
         script {
@@ -36,7 +43,6 @@ pipeline {
   post {
     always {
       echo 'Pipeline finished.'
-      // Adjust paths based on your reports if any
       archiveArtifacts artifacts: '**/test-results/*.xml', allowEmptyArchive: true
       junit '**/test-results/*.xml'
     }
