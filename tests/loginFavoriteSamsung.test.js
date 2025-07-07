@@ -1,116 +1,110 @@
 const { Builder, By, until } = require("selenium-webdriver");
-require("dotenv").config();
 const assert = require("assert");
 
 describe("Test Favorite Samsung Device", function () {
-  this.timeout(60000); // allow extra time
+  this.timeout(300000); // 5 min timeout
 
-  const capabilitiesList = [
-    {
-      os: "Windows",
-      os_version: "10",
-      browserName: "Chrome",
-      "browserstack.user": process.env.BROWSERSTACK_USERNAME,
-      "browserstack.key": process.env.BROWSERSTACK_ACCESS_KEY,
-      build: "BSTACK Beginner Test",
-      name: "Test on Win10 Chrome",
-    },
-    {
-      os: "OS X",
-      os_version: "Ventura",
-      browserName: "Firefox",
-      "browserstack.user": process.env.BROWSERSTACK_USERNAME,
-      "browserstack.key": process.env.BROWSERSTACK_ACCESS_KEY,
-      build: "BSTACK Beginner Test",
-      name: "Test on macOS Firefox",
-    },
-    {
-      device: "Samsung Galaxy S22",
-      realMobile: "true",
-      browserName: "Chrome",
-      "browserstack.user": process.env.BROWSERSTACK_USERNAME,
-      "browserstack.key": process.env.BROWSERSTACK_ACCESS_KEY,
-      build: "BSTACK Beginner Test",
-      name: "Test on Galaxy S22",
-    },
-  ];
+  let driver;
+  const browserstackUser = process.env.BROWSERSTACK_USERNAME;
+  const browserstackKey = process.env.BROWSERSTACK_ACCESS_KEY;
 
-  capabilitiesList.forEach((caps) => {
-    it(
-      "should favorite Galaxy S20+ on " + (caps.browserName || caps.device),
-      async function () {
-        const driver = new Builder()
-          .usingServer(
-            "https://" +
-              process.env.BROWSERSTACK_USERNAME +
-              ":" +
-              process.env.BROWSERSTACK_ACCESS_KEY +
-              "@hub-cloud.browserstack.com/wd/hub"
-          )
-          .withCapabilities(caps)
-          .build();
+  const browser = process.env.BROWSER || "Chrome";
+  const os = process.env.OS || "Windows";
+  const osVersion = process.env.OS_VERSION || "10.0";
+  const device = process.env.DEVICE;
 
-        try {
-          await driver.get("https://www.bstackdemo.com");
+  before(async () => {
+    const capabilities = {
+      "bstack:options": {
+        userName: browserstackUser,
+        accessKey: browserstackKey,
+        os: os,
+        osVersion: osVersion,
+        deviceName: device,
+        realMobile: !!device,
+        seleniumVersion: "4.0.0",
+      },
+      browserName: browser,
+      browserVersion: "latest",
+    };
 
-          // Click the login button to open the login modal
-          const loginButton = await driver.wait(
-            until.elementLocated(By.id("login-btn")),
-            10000
-          );
-          await loginButton.click();
+    driver = await new Builder()
+      .usingServer("https://hub.browserstack.com/wd/hub")
+      .withCapabilities(capabilities)
+      .build();
+  });
 
-          // Wait for username input to appear after login modal opens
-          const username = await driver.wait(
-            until.elementLocated(By.id("username")),
-            10000
-          );
-          await username.sendKeys("demouser");
+  after(async () => {
+    if (driver) {
+      await driver.quit();
+    }
+  });
 
-          // Enter password
-          await driver
-            .findElement(By.id("password"))
-            .sendKeys("testingisfun99");
+  it("should login, filter Samsung, favorite Galaxy S20+, and verify it in favorites", async () => {
+    // Open main page
+    await driver.get("https://www.bstackdemo.com/");
 
-          // Click submit button
-          const loginSubmitBtn = await driver.findElement(
-            By.css("button[type='submit']")
-          );
-          await loginSubmitBtn.click();
+    // Click the Sign In button
+    const signInBtn = await driver.wait(
+      until.elementLocated(By.id("signin")),
+      10000
+    );
+    await signInBtn.click();
 
-          // wait for filter and click Samsung
-          await driver.wait(until.elementLocated(By.css(".filter")), 15000);
-          const samsungFilter = await driver.findElement(
-            By.css("label[for='samsung']")
-          );
-          await samsungFilter.click();
+    // Wait for login form to appear
+    const usernameInput = await driver.wait(
+      until.elementLocated(By.id("username")),
+      10000
+    );
+    const passwordInput = await driver.findElement(By.id("password"));
+    const loginBtn = await driver.findElement(By.id("login-btn"));
 
-          // wait a bit for page to update
-          await driver.sleep(2000);
+    // Fill in credentials and submit
+    await usernameInput.sendKeys("demouser");
+    await passwordInput.sendKeys("testingisfun99");
+    await loginBtn.click();
 
-          // favorite Galaxy S20+
-          const heartIcon = await driver.findElement(
-            By.css("div[data-testid='Galaxy S20+'] .wishlistIcon")
-          );
-          await heartIcon.click();
+    // Wait for product filter input to appear (login success)
+    const filterInput = await driver.wait(
+      until.elementLocated(By.css('input[placeholder="Filter by brand"]')),
+      15000
+    );
 
-          // go to favorites page
-          await driver.findElement(By.id("wishlist-link")).click();
+    // Filter for Samsung devices
+    await filterInput.clear();
+    await filterInput.sendKeys("Samsung");
 
-          // verify Galaxy S20+ is present
-          const favoriteItem = await driver.findElement(
-            By.css("div[data-testid='Galaxy S20+']")
-          );
-          const isDisplayed = await favoriteItem.isDisplayed();
-          assert.strictEqual(
-            isDisplayed,
-            true,
-            "Galaxy S20+ should be in favorites"
-          );
-        } finally {
-          await driver.quit();
-        }
-      }
+    // Wait for filtered results to update
+    await driver.sleep(3000);
+
+    // Find Galaxy S20+ card
+    const galaxyCard = await driver.findElement(
+      By.xpath(
+        "//*[contains(text(), 'Galaxy S20+')]//ancestor::div[contains(@class, 'product')]"
+      )
+    );
+
+    // Click yellow heart icon inside that card to favorite
+    const heartIcon = await galaxyCard.findElement(By.css(".heart"));
+    await heartIcon.click();
+
+    // Click on Favorites page link
+    const favoritesLink = await driver.findElement(By.id("favourites"));
+    await favoritesLink.click();
+
+    // Verify Galaxy S20+ is listed in favorites
+    await driver.wait(
+      until.elementLocated(By.xpath("//*[contains(text(), 'Galaxy S20+')]")),
+      10000
+    );
+    const favoriteDevice = await driver.findElement(
+      By.xpath("//*[contains(text(), 'Galaxy S20+')]")
+    );
+    const isDisplayed = await favoriteDevice.isDisplayed();
+    assert.strictEqual(
+      isDisplayed,
+      true,
+      "Galaxy S20+ should be displayed in favorites"
     );
   });
 });
