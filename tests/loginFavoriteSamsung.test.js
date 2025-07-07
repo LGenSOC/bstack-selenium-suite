@@ -53,31 +53,32 @@ describe("Test Favorite Samsung Device", function () {
         try {
           await driver.get("https://www.bstackdemo.com");
 
-          // Wait for username input to be located and visible, then send keys
-          const usernameInput = await driver.wait(
+          // Click the login button to open the login modal
+          const loginButton = await driver.wait(
+            until.elementLocated(By.id("login-btn")),
+            10000
+          );
+          await loginButton.click();
+
+          // Wait for username input to appear after login modal opens
+          const username = await driver.wait(
             until.elementLocated(By.id("username")),
-            15000
+            10000
           );
-          await driver.wait(until.elementIsVisible(usernameInput), 15000);
-          await usernameInput.sendKeys("demouser");
+          await username.sendKeys("demouser");
 
-          // Wait for password input to be located and visible, then send keys
-          const passwordInput = await driver.wait(
-            until.elementLocated(By.id("password")),
-            15000
+          // Enter password
+          await driver
+            .findElement(By.id("password"))
+            .sendKeys("testingisfun99");
+
+          // Click submit button
+          const loginSubmitBtn = await driver.findElement(
+            By.css("button[type='submit']")
           );
-          await driver.wait(until.elementIsVisible(passwordInput), 15000);
-          await passwordInput.sendKeys("testingisfun99");
+          await loginSubmitBtn.click();
 
-          // Wait for login button to be located and visible, then click
-          const loginBtn = await driver.wait(
-            until.elementLocated(By.css("button[type='submit']")),
-            15000
-          );
-          await driver.wait(until.elementIsVisible(loginBtn), 15000);
-          await loginBtn.click();
-
-          // Wait for filter and click Samsung
+          // wait for filter and click Samsung
           await driver.wait(until.elementLocated(By.css(".filter")), 15000);
           const samsungFilter = await driver.findElement(
             By.css("label[for='samsung']")
