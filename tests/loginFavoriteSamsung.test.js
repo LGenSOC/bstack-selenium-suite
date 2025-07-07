@@ -53,12 +53,23 @@ describe("Test Favorite Samsung Device", function () {
         try {
           await driver.get("https://www.bstackdemo.com");
 
-          // login
-          await driver.findElement(By.id("username")).sendKeys("demouser");
+          // Wait for username field before sending keys
+          let username = await driver.wait(
+            until.elementLocated(By.id("username")),
+            10000
+          );
+          await username.sendKeys("demouser");
+
+          // Send password
           await driver
             .findElement(By.id("password"))
             .sendKeys("testingisfun99");
-          await driver.findElement(By.id("login-btn")).click();
+
+          // Fix login button selector to button[type='submit']
+          const loginBtn = await driver.findElement(
+            By.css("button[type='submit']")
+          );
+          await loginBtn.click();
 
           // wait for filter and click Samsung
           await driver.wait(until.elementLocated(By.css(".filter")), 15000);
