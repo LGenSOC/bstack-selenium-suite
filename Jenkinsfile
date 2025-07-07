@@ -1,25 +1,10 @@
 pipeline {
   agent any
 
-  environment {
-    // Nothing here — we'll load them in a stage below
-  }
-
   stages {
     stage('Checkout') {
       steps {
         checkout scm
-      }
-    }
-
-    stage('Debug Credentials') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: '40abe281-b26c-4882-bce3-00db98efa524', 
-                                          usernameVariable: 'BROWSERSTACK_USERNAME', 
-                                          passwordVariable: 'BROWSERSTACK_ACCESS_KEY')]) {
-          sh 'echo "BROWSERSTACK_USERNAME: $BROWSERSTACK_USERNAME"'
-          sh 'echo "BROWSERSTACK_ACCESS_KEY: $BROWSERSTACK_ACCESS_KEY"'
-        }
       }
     }
 
@@ -29,12 +14,26 @@ pipeline {
       }
     }
 
+    stage('Debug Credentials') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: '40abe281-b26c-4882-bce3-00db98efa524', usernameVariable: 'BROWSERSTACK_USERNAME', passwordVariable: 'BROWSERSTACK_ACCESS_KEY')]) {
+          sh 'echo "BROWSERSTACK_USERNAME: $BROWSERSTACK_USERNAME"'
+          sh 'echo "BROWSERSTACK_ACCESS_KEY: $BROWSERSTACK_ACCESS_KEY"'
+        }
+      }
+    }
+
     stage('Test') {
       steps {
-        withCredentials([usernamePassword(credentialsId: '40abe281-b26c-4882-bce3-00db98efa524',
-                                          usernameVariable: 'BROWSERSTACK_USERNAME',
-                                          passwordVariable: 'BROWSERSTACK_ACCESS_KEY')]) {
-          sh 'npx mocha tests/loginFavoriteSamsung.test.js'
+        withCredentials([usernamePassword(credentialsId: '40abe281-b26c-4882-bce3-00db98efa524', usernameVariable: 'BROWSERSTACK_USERNAME', passwordVariable: 'BROWSERSTACK_ACCESS_KEY')]) {
+          script {
+            try {
+              sh 'npx mocha tests/loginFavoriteSamsung.test.js'
+            } catch (err) {
+              currentBuild.result = 'FAILURE'
+              throw err
+            }
+          }
         }
       }
     }
