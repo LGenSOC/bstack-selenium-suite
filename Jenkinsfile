@@ -13,16 +13,16 @@ pipeline {
       }
     }
 
-    stage('Install') {
-      steps {
-        sh 'npm install'
-      }
-    }
-
     stage('Debug Credentials') {
       steps {
         sh 'echo "BROWSERSTACK_USERNAME: $BROWSERSTACK_USERNAME"'
         sh 'echo "BROWSERSTACK_ACCESS_KEY: $BROWSERSTACK_ACCESS_KEY"'
+      }
+    }
+
+    stage('Install') {
+      steps {
+        sh 'npm install'
       }
     }
 
