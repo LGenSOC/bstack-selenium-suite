@@ -35,11 +35,14 @@ pipeline {
   }
 
   post {
-    always {
-      steps {
-      echo 'Tests completed'
-      archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
-    }
+  always {
+    node {
+      ws {
+        sh 'pwd'
+        sh 'ls -la reports || echo "reports folder missing"'
+        echo 'Tests completed'
+        archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
+      }
     }
   }
 }
