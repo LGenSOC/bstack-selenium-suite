@@ -2,18 +2,14 @@ pipeline {
   agent any
 
   environment {
-    // Use the ID of the credential that stores the username secret
-    BROWSERSTACK_USERNAME = credentials('browserstack-username')
-    // Use the ID of the credential that stores the access key secret
-    BROWSERSTACK_ACCESS_KEY = credentials('browserstack-access-key')
+    // These are now correctly set up and masked in the logs, GREAT!
+    BROWSERSTACK_USERNAME = credentials('browserstack-username') // Use the ID you set
+    BROWSERSTACK_ACCESS_KEY = credentials('browserstack-access-key') // Use the ID you set
   }
 
   stages {
-    stage('Checkout') {
-      steps {
-        git 'https://github.com/LGenSOC/bstack-selenium-suite.git'
-      }
-    }
+    // REMOVED: stage('Checkout') block
+    // Jenkins automatically checks out the repo containing the Jenkinsfile at the start.
 
     stage('Install Dependencies') {
       steps {
