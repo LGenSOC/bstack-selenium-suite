@@ -1,80 +1,35 @@
-const { Builder, By, until } = require("selenium-webdriver");
-const { describe, it, before, after } = require("mocha");
-
 require("dotenv").config();
 
-const USERNAME = process.env.BROWSERSTACK_USERNAME;
-const ACCESS_KEY = process.env.BROWSERSTACK_ACCESS_KEY;
-
-const capabilities = {
-  "bstack:options": {
-    os: "Windows",
-    osVersion: "10",
-    buildName: "WebDriver Challenge Build",
-    sessionName: "Login and Favorite Samsung",
-    userName: USERNAME,
-    accessKey: ACCESS_KEY,
-  },
-  browserName: "Chrome",
+const commonCapabilities = {
+  "browserstack.user": process.env.BROWSERSTACK_USERNAME,
+  "browserstack.key": process.env.BROWSERSTACK_ACCESS_KEY,
+  build: "BSTACK Tech Challenge",
+  name: "Tech Challenge Test",
+  "browserstack.debug": true,
+  "browserstack.networkLogs": true,
 };
 
-describe("Test Favorite Samsung Device", function () {
-  this.timeout(60000);
-  let driver;
+const capabilities = [];
 
-  before(async function () {
-    driver = await new Builder()
-      .usingServer("https://hub.browserstack.com/wd/hub")
-      .withCapabilities(capabilities)
-      .build();
+if (process.env.DEVICE) {
+  // Real mobile device config
+  capabilities.push({
+    ...commonCapabilities,
+    device: process.env.DEVICE,
+    realMobile: "true",
+    browserName: process.env.BROWSER || "Chrome",
+    os_version: process.env.OS_VERSION || "12.0",
   });
-
-  after(async function () {
-    await driver.quit();
+} else {
+  // Desktop browser config
+  capabilities.push({
+    ...commonCapabilities,
+    os: process.env.OS,
+    os_version: process.env.OS_VERSION,
+    browserName: process.env.BROWSER,
   });
+}
 
-  it("should log in and favorite Galaxy S20+", async function () {
-    await driver.get("https://www.bstackdemo.com/signin");
-
-    // Fill in credentials
-    await driver.findElement(By.id("username")).sendKeys("demouser");
-    await driver.findElement(By.id("password")).sendKeys("testingisfun99");
-
-    // Click login
-    await driver.findElement(By.id("login-btn")).click();
-
-    // Wait for Samsung filter checkbox
-    await driver.wait(
-      until.elementLocated(By.css('input[type="checkbox"][value="Samsung"]')),
-      10000
-    );
-
-    // Filter to Samsung
-    await driver
-      .findElement(By.css('input[type="checkbox"][value="Samsung"]'))
-      .click();
-
-    // Wait for Galaxy S20+ card
-    await driver.wait(
-      until.elementLocated(By.xpath('//p[text()="Galaxy S20+"]')),
-      10000
-    );
-
-    // Click the heart icon next to Galaxy S20+
-    const favIcon = await driver.findElement(
-      By.xpath(
-        '//p[text()="Galaxy S20+"]/ancestor::div[contains(@class,"shelf-item")]/descendant::div[contains(@class,"shelf-item__heart")]'
-      )
-    );
-    await favIcon.click();
-
-    // Click on Favorites (heart icon in navbar)
-    await driver.findElement(By.id("favorites")).click();
-
-    // Wait and verify that Galaxy S20+ is in favorites
-    await driver.wait(
-      until.elementLocated(By.xpath('//p[text()="Galaxy S20+"]')),
-      10000
-    );
-  });
-});
+module.exports = {
+  capabilities,
+};
