@@ -1,7 +1,7 @@
 pipeline {
   agent any  // ensures node context for all stages and post blocks
 
-  environment {.   
+  environment {
     BROWSERSTACK_USERNAME = credentials('inesbrown_gMa9mb')
     BROWSERSTACK_ACCESS_KEY = credentials('LJEAxKYyRkApfUgXsq4j')
   }
@@ -36,10 +36,8 @@ pipeline {
 
   post {
     always {
-      // These steps run inside the node workspace because of agent any above
       echo 'Tests completed'
       archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
     }
   }
 }
-
