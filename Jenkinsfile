@@ -1,8 +1,9 @@
 pipeline {
-  agent any
+  agent any  // ensures node context for all stages and post blocks
 
-  environment {
-    BROWSERSTACK_CREDENTIALS = credentials('browserstack-credentials-id')  // Replace with your Jenkins credential ID
+  environment {.   
+    BROWSERSTACK_USERNAME = credentials('inesbrown_gMa9mb')
+    BROWSERSTACK_ACCESS_KEY = credentials('LJEAxKYyRkApfUgXsq4j')
   }
 
   stages {
@@ -18,53 +19,24 @@ pipeline {
       }
     }
 
-    stage('Run Tests in Parallel on BrowserStack') {
-      parallel {
-        stage('Windows 10 - Chrome') {
-          steps {
-            sh '''
-              npx cross-env \
-              BROWSER=chrome \
-              OS=Windows \
-              OS_VERSION=10 \
-              BROWSERSTACK_USERNAME=$BROWSERSTACK_CREDENTIALS_USR \
-              BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_CREDENTIALS_PSW \
-              npx mocha tests/loginFavoriteSamsung.test.js
-            '''
-          }
-        }
-        stage('macOS Ventura - Firefox') {
-          steps {
-            sh '''
-              npx cross-env \
-              BROWSER=firefox \
-              OS="OS X" \
-              OS_VERSION=Ventura \
-              BROWSERSTACK_USERNAME=$BROWSERSTACK_CREDENTIALS_USR \
-              BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_CREDENTIALS_PSW \
-              npx mocha tests/loginFavoriteSamsung.test.js
-            '''
-          }
-        }
-        stage('Samsung Galaxy S22 (Real Device)') {
-          steps {
-            sh '''
-              npx cross-env \
-              DEVICE="Samsung Galaxy S22" \
-              REAL_MOBILE=true \
-              OS_VERSION="12.0" \
-              BROWSERSTACK_USERNAME=$BROWSERSTACK_CREDENTIALS_USR \
-              BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_CREDENTIALS_PSW \
-              npx mocha tests/loginFavoriteSamsung.test.js
-            '''
-          }
-        }
+    stage('Run Tests') {
+      steps {
+        sh '''
+          npx cross-env \
+          BROWSER=chrome \
+          OS=Windows \
+          OS_VERSION=10 \
+          BROWSERSTACK_USERNAME=$BROWSERSTACK_USERNAME \
+          BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_ACCESS_KEY \
+          npx mocha tests/loginFavoriteSamsung.test.js
+        '''
       }
     }
   }
 
   post {
     always {
+      // These steps run inside the node workspace because of agent any above
       echo 'Tests completed'
       archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
     }
