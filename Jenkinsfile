@@ -35,14 +35,15 @@ pipeline {
   }
 
   post {
-  always {
-    node {
-      ws {
-        sh 'pwd'
-        sh 'ls -la reports || echo "reports folder missing"'
-        echo 'Tests completed'
-        archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
-      }
-    }
-  }
-}
+    always {
+      node {
+        ws {
+          sh 'pwd'
+          sh 'ls -la reports || echo "reports folder missing"'
+          echo 'Tests completed'
+          archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
+        } // <--- This closes 'ws' block
+      } // <--- This closes 'node' block
+    } // <--- This closes 'always' block
+  } // <--- This closes 'post' block
+} // <--- This closes 'pipeline' block (which was already there)
