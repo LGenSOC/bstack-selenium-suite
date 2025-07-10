@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     BROWSERSTACK_USERNAME = credentials('inesbrown_gMa9mb')
-    BROWSERSTACK_ACCESS_KEY = credentials('LJEAxKYyRkApfUgXsq4j')
+    BROWSERSTACK_ACCESS_KEY = credentials('40abe281-b26c-4882-bce3-00db98efa524')
   }
 
   stages {
