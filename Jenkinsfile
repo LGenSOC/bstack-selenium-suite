@@ -2,8 +2,7 @@ pipeline {
   agent any
 
   environment {
-    BROWSERSTACK_USERNAME = credentials('browserstack-username') // Your Jenkins credentials ID
-    BROWSERSTACK_ACCESS_KEY = credentials('browserstack-access-key') // Your Jenkins credentials ID
+    BROWSERSTACK_CREDENTIALS = credentials('browserstack-credentials-id')  // Replace with your Jenkins credential ID
   }
 
   stages {
@@ -28,8 +27,8 @@ pipeline {
               BROWSER=chrome \
               OS=Windows \
               OS_VERSION=10 \
-              BROWSERSTACK_USERNAME=$BROWSERSTACK_USERNAME \
-              BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_ACCESS_KEY \
+              BROWSERSTACK_USERNAME=$BROWSERSTACK_CREDENTIALS_USR \
+              BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_CREDENTIALS_PSW \
               npx mocha tests/loginFavoriteSamsung.test.js
             '''
           }
@@ -41,8 +40,8 @@ pipeline {
               BROWSER=firefox \
               OS="OS X" \
               OS_VERSION=Ventura \
-              BROWSERSTACK_USERNAME=$BROWSERSTACK_USERNAME \
-              BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_ACCESS_KEY \
+              BROWSERSTACK_USERNAME=$BROWSERSTACK_CREDENTIALS_USR \
+              BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_CREDENTIALS_PSW \
               npx mocha tests/loginFavoriteSamsung.test.js
             '''
           }
@@ -54,8 +53,8 @@ pipeline {
               DEVICE="Samsung Galaxy S22" \
               REAL_MOBILE=true \
               OS_VERSION="12.0" \
-              BROWSERSTACK_USERNAME=$BROWSERSTACK_USERNAME \
-              BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_ACCESS_KEY \
+              BROWSERSTACK_USERNAME=$BROWSERSTACK_CREDENTIALS_USR \
+              BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_CREDENTIALS_PSW \
               npx mocha tests/loginFavoriteSamsung.test.js
             '''
           }
@@ -71,6 +70,4 @@ pipeline {
     }
   }
 }
-
-
 
