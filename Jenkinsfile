@@ -36,12 +36,17 @@ pipeline {
 
   post {
     always {
-      // The 'sh' and 'echo' commands here will automatically run
-      // on the same agent and in the same workspace as the rest of the pipeline.
-      sh 'pwd'
-      sh 'ls -la reports || echo "reports folder missing"'
-      echo 'Tests completed'
-      archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
+      // Use a script block to run procedural steps
+      script {
+        // Enclose steps that need a workspace (like sh, archiveArtifacts)
+        // within a node block to ensure context.
+        node { // This ensures a node and its workspace context are available
+          sh 'pwd'
+          sh 'ls -la reports || echo "reports folder missing"'
+          echo 'Tests completed'
+          archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
+        }
+      }
     }
   }
 }
