@@ -36,7 +36,7 @@ pipeline {
 
   post {
     always {
-      node {
+      steps {
       echo 'Tests completed'
       archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
     }
